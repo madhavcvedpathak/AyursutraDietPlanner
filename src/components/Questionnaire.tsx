@@ -3,16 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { Option } from '../types.ts';
 import { questions } from '../data/questions.ts';
 import { cn } from '../lib/utils';
-import { ChevronRight, Check } from 'lucide-react';
+import { ChevronRight, Check, ArrowLeft } from 'lucide-react';
 
 interface QuestionnaireProps {
     onComplete: (scores: { Vata: number; Pitta: number; Kapha: number }) => void;
+    onExit: () => void;
 }
 
-export const Questionnaire: React.FC<QuestionnaireProps> = ({ onComplete }) => {
+export const Questionnaire: React.FC<QuestionnaireProps> = ({ onComplete, onExit }) => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [scores, setScores] = useState({ Vata: 0, Pitta: 0, Kapha: 0 });
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [history, setHistory] = useState<Option[]>([]);
 
     const currentQuestion = questions[currentQuestionIndex];
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
@@ -28,6 +30,7 @@ export const Questionnaire: React.FC<QuestionnaireProps> = ({ onComplete }) => {
                 Kapha: scores.Kapha + option.weight.Kapha,
             };
             setScores(newScores);
+            setHistory([...history, option]);
 
             if (currentQuestionIndex < questions.length - 1) {
                 setCurrentQuestionIndex(prev => prev + 1);
@@ -38,8 +41,35 @@ export const Questionnaire: React.FC<QuestionnaireProps> = ({ onComplete }) => {
         }, 400);
     };
 
+    const handleBack = () => {
+        if (currentQuestionIndex === 0) {
+            onExit();
+            return;
+        }
+
+        const lastOption = history[history.length - 1];
+        if (lastOption) {
+            setScores({
+                Vata: scores.Vata - lastOption.weight.Vata,
+                Pitta: scores.Pitta - lastOption.weight.Pitta,
+                Kapha: scores.Kapha - lastOption.weight.Kapha,
+            });
+            setHistory(history.slice(0, -1));
+        }
+        setCurrentQuestionIndex(prev => prev - 1);
+        setSelectedOption(null);
+    };
+
     return (
-        <div className="w-full max-w-2xl mx-auto p-6">
+        <div className="w-full max-w-2xl mx-auto p-6 relative">
+            <button
+                onClick={handleBack}
+                className="absolute -top-12 left-0 p-2 text-secondary hover:bg-black/5 rounded-full transition-colors"
+                aria-label="Go back"
+            >
+                <ArrowLeft className="w-6 h-6" />
+            </button>
+
             {/* Progress Bar */}
             <div className="mb-8">
                 <div className="flex justify-between text-sm font-heading text-secondary mb-2">

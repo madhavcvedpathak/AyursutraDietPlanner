@@ -4,7 +4,6 @@ import { DietPlanResult } from './components/DietPlanResult.tsx';
 import { dietPlans } from './data/knowledgeBase.ts';
 import type { DietPlan, Dosha } from './types.ts';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf } from 'lucide-react';
 
 function App() {
   const [step, setStep] = useState<'welcome' | 'quiz' | 'result'>('welcome');
@@ -43,7 +42,6 @@ function App() {
 
       <header className="mb-12 text-center">
         <div className="flex items-center justify-center gap-3 mb-4">
-          <Leaf className="w-8 h-8 text-primary" />
           <h1 className="text-4xl md:text-5xl font-heading text-secondary font-bold">Ayursutra</h1>
         </div>
         <p className="text-lg text-gray-600 font-body italic">Discover your ancient path to wellness</p>
@@ -81,7 +79,10 @@ function App() {
             exit={{ opacity: 0, y: -20 }}
             className="w-full"
           >
-            <Questionnaire onComplete={handleQuizComplete} />
+            <Questionnaire
+              onComplete={handleQuizComplete}
+              onExit={() => setStep('welcome')}
+            />
           </motion.div>
         )}
 
